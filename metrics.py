@@ -6,6 +6,7 @@ from PIL import Image
 import glob
 import decimal
 import csv
+import math
 
 image_list1 = []
 image_list2 = []
@@ -59,8 +60,14 @@ if (i == j):
 			accuracy = format((TP + TN) * 100 / width / height, '.6f')
 			precision = format(TP / (TP + FP), '.6f')
 			sensitivity = format(TP / (TP + FN), '.6f')
+			specificity = format(TN / (TN + FP), '.6f')
+			#fmeasure = format((2 * precision * sensitivity / (precision + sensitivity)), '.6f')
+			#print (TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)
+			mcc = format((TP * TN - FP * FN) / math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)), '.6f')
+			dice = format(2 * TP / (2 * TP + FP + FN), '.6f')
+			jaccard = format(TP / (TP + FP + FN), '.6f')
 			csvwriter = csv.writer(csvfile)
-			row = [accuracy, precision, sensitivity] 
+			row = [accuracy, precision, sensitivity, specificity, mcc, dice, jaccard] 
 			csvwriter.writerow(row)
 
 
