@@ -7,6 +7,9 @@ import glob
 import decimal
 import csv
 import math
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import measure
 
 image_list1 = []
 image_list2 = []
@@ -16,25 +19,25 @@ filenames2 = glob.glob("Output/*.png")
 filenames2.sort()
 
 
-i = 0
+GTnum = 0
 for filename1 in filenames1: #assuming gif
     im1=Image.open(filename1)
     image_list1.append(im1)
-    i = i + 1
+    GTnum = GTnum + 1
 
-j = 0
+SEGnum = 0
 for filename2 in filenames2: #assuming gif
     im2=Image.open(filename2)
     image_list2.append(im2)
-    j = j + 1
+    SEGnum = SEGnum + 1
 
-print i , j
+print GTnum, SEGnum
 
 outputfile = "metrics.csv"
 
-if (i == j):
+if (GTnum == SEGnum):
 	with open(outputfile, 'w') as csvfile:
-		for counter in range(0,i):
+		for counter in range(0,GTnum):
 			im1 = image_list1[counter]
 			pixels1 = list(im1.getdata())
 			width, height = im1.size
@@ -44,7 +47,6 @@ if (i == j):
 			width, height = im2.size
 			pixels2 = [pixels2[i * width:(i + 1) * width] for i in xrange(height)]
 
-			counter2 = 0
 			TP = FP = FN = TN = 0
 			for k in range(0, width):
 				for m in range(0, height):
@@ -69,6 +71,27 @@ if (i == j):
 			csvwriter = csv.writer(csvfile)
 			row = [accuracy, precision, sensitivity, specificity, mcc, dice, jaccard] 
 			csvwriter.writerow(row)
+
+			new_img = Image.blend(im1, im2, 0.5)
+			# Find contours at a constant value of 0.8
+			contours = measure.find_contours(im1, 1)
+			contours2 = measure.find_contours(im2, 1)
+
+			# Display the image and plot all contours found
+			fig, ax = plt.subplots()
+			ax.imshow(new_img, cmap=plt.cm.gray)
+			for contour in contours:
+			    ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
+			for contour in contours2:
+			    ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
+
+			#ax.axis('image')
+			#ax.set_xticks([])
+			#ax.set_yticks([])
+			#plt.show()
+			new_img_name = "Overlapped/" + str(counter) + "_overlapped.png"
+			fig.savefig(new_img_name)
+			plt.close()
 
 
 
